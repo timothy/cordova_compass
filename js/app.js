@@ -1,8 +1,7 @@
 /**
  * Created by Timothy on 2/19/2016.
- * This is a compass example using the Cordova plugin.
+ * This is a compass example without using the Cordova plugin.
  */
-
 var renderer = PIXI.autoDetectRenderer(window.screen.width, window.screen.height, {backgroundColor: 0x1099bb});
 document.body.appendChild(renderer.view);
 
@@ -33,19 +32,33 @@ stage.addChild(compass);
 
 document.addEventListener("deviceready", function () {
     // start animating
-    animate();
+    if (window.DeviceOrientationEvent) {
+        console.log("DeviceOrientation is supported");
+        animate();
+    }else{
+        console.log("DeviceOrientation is NOT supported");
+    }
 }, false);
 
 
+window.addEventListener('deviceorientation', function(eventData) {
+    //need to convert from degrees to radian because that is what pixi uses to rotate img.
+    //Convert to radian like this (heading.magneticHeading)/57.2958)
+
+    // gamma is the left-to-right tilt in degrees, where right is positive
+    //eventData.gamma;
+
+    // beta is the front-to-back tilt in degrees, where front is positive
+    // eventData.beta;
+     console.log(eventData.alpha);
+    // alpha is the compass direction the device is facing in degrees
+    compass.rotation = ((eventData.alpha)/57.2958);
+
+}, false);
+
 function animate() {
     requestAnimationFrame(animate);
-    navigator.compass.getCurrentHeading(function (heading) {
-        //need to convert from degrees to radian because that is what pixi uses to rotate img.
-        // Convert to radian like this (heading.magneticHeading)/57.2958)
-        compass.rotation = 6.28319 - ((heading.magneticHeading)/57.2958);//need to convert from degrees to radian
-    }, function(error){
-        console.log(error.code);
-    });
+
     // render the container
     renderer.render(stage);
 }
